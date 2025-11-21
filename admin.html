@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Admin Console</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <header class="bg-slate-900 text-white py-8 shadow">
+        <div class="max-w-4xl mx-auto px-6 flex items-center justify-between">
+            <div>
+                <p class="uppercase text-sm tracking-widest mb-1 text-slate-300">Election Register Services</p>
+                <h1 class="text-3xl font-bold">Voter Lookup & SMS Portal</h1>
+            </div>
+            <a href="./index.html" class="text-xs underline text-slate-300">Back to voter portal</a>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 py-10 space-y-8">
+        <section class="bg-white rounded-2xl shadow p-6 border border-slate-200 grid gap-6 md:grid-cols-2">
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900 mb-2">Voter Self-Service Lookup</h3>
+                <p class="text-sm text-slate-500 mb-4">Simulate the SMS/online register verification service.</p>
+                <form id="lookupForm" class="space-y-3">
+                    <label class="text-sm font-medium text-slate-600 flex flex-col">
+                        Student ID / Email
+                        <input id="lookupStudentId" type="text" class="mt-1 border rounded-md px-3 py-2 focus:ring-2 focus:ring-slate-600 focus:outline-none" placeholder="STU-2025-001">
+                    </label>
+                    <label class="text-sm font-medium text-slate-600 flex flex-col">
+                        Phone Number
+                        <input id="lookupPhone" type="text" class="mt-1 border rounded-md px-3 py-2 focus:ring-2 focus:ring-slate-600 focus:outline-none" placeholder="+2547...">
+                    </label>
+                    <div class="flex gap-3 flex-wrap">
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">Check Register</button>
+                        <button type="button" id="sendSmsLookup" class="bg-emerald-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:outline-none">Send SMS</button>
+                    </div>
+                </form>
+                <p id="lookupMessage" class="text-sm font-medium mt-3"></p>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900 mb-2">About the Register</h3>
+                <p class="text-sm text-slate-500">This demo uses the centralized biometric register to confirm enrolment, grade, phone contact, and voting status. It mirrors the SMS/online verification services used by EMBs.</p>
+                <ul class="text-xs text-slate-500 list-disc ml-4 mt-3 space-y-1">
+                    <li>Provide ID or phone to confirm registration.</li>
+                    <li>Optional SMS response shows what voters receive.</li>
+                    <li>All data comes from the secure voter register database.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow p-6 border border-slate-200 grid gap-6 md:grid-cols-2">
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900 mb-2">Voter Self-Service Lookup</h3>
+                <p class="text-sm text-slate-500 mb-4">Simulate the SMS/online register verification service.</p>
+                <form id="lookupForm" class="space-y-3">
+                    <label class="text-sm font-medium text-slate-600 flex flex-col">
+                        Student ID / Email
+                        <input id="lookupStudentId" type="text" class="mt-1 border rounded-md px-3 py-2 focus:ring-2 focus:ring-slate-600 focus:outline-none" placeholder="STU-2025-001">
+                    </label>
+                    <label class="text-sm font-medium text-slate-600 flex flex-col">
+                        Phone Number
+                        <input id="lookupPhone" type="text" class="mt-1 border rounded-md px-3 py-2 focus:ring-2 focus:ring-slate-600 focus:outline-none" placeholder="+2547...">
+                    </label>
+                    <div class="flex gap-3">
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">Check Register</button>
+                        <button type="button" id="sendSmsLookup" class="bg-emerald-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:outline-none">Send SMS</button>
+                    </div>
+                </form>
+                <p id="lookupMessage" class="text-sm font-medium mt-3"></p>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900 mb-2">Printable Register Snapshot</h3>
+                <p class="text-sm text-slate-500">Use the download button above to export a CSV ready for printing. Each entry contains the student ID, name, grade/class, phone and voting status.</p>
+                <ul class="text-xs text-slate-500 list-disc ml-4 mt-3 space-y-1">
+                    <li>CSV mirrors the physical registers shared at polling centres.</li>
+                    <li>Online/SMS lookup uses the same data for transparency.</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const API_BASE = (window.ELECTION_API_BASE || 'http://localhost:4000') + '/api';
+            const lookupForm = document.getElementById('lookupForm');
+            const lookupMessage = document.getElementById('lookupMessage');
+            const lookupStudentId = document.getElementById('lookupStudentId');
+            const lookupPhone = document.getElementById('lookupPhone');
+            const sendSmsLookupButton = document.getElementById('sendSmsLookup');
+
+            lookupForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                lookupMessage.textContent = 'Checking register...';
+                lookupMessage.className = 'text-sm font-medium text-slate-600';
+                try {
+                    const params = new URLSearchParams();
+                    if (lookupStudentId.value.trim()) params.append('studentId', lookupStudentId.value.trim());
+                    if (lookupPhone.value.trim()) params.append('phone', lookupPhone.value.trim());
+                    if ([...params.keys()].length === 0) {
+                        throw new Error('Provide a student ID or phone number.');
+                    }
+                    const response = await fetch(`${API_BASE}/register/lookup?${params.toString()}`);
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Lookup failed');
+                    if (!data.registered) {
+                        lookupMessage.textContent = 'No matching voter found.';
+                        lookupMessage.className = 'text-sm font-medium text-red-600';
+                    } else {
+                        lookupMessage.textContent = `Registered: ${data.voter.name} (${data.voter.grade || 'N/A'}). Status: ${data.voter.votedAt ? 'Voted' : 'Pending vote'}.`;
+                        lookupMessage.className = 'text-sm font-medium text-green-600';
+                    }
+                } catch (error) {
+                    lookupMessage.textContent = error.message;
+                    lookupMessage.className = 'text-sm font-medium text-red-600';
+                }
+            });
+
+            sendSmsLookupButton.addEventListener('click', async () => {
+                lookupMessage.textContent = 'Sending SMS...';
+                lookupMessage.className = 'text-sm font-medium text-slate-600';
+                try {
+                    const payload = {
+                        studentId: lookupStudentId.value.trim(),
+                        phone: lookupPhone.value.trim()
+                    };
+                    if (!payload.studentId || !payload.phone) {
+                        throw new Error('Provide both student ID and phone to send SMS.');
+                    }
+                    const response = await fetch(`${API_BASE}/register/lookup/sms`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'SMS lookup failed');
+                    lookupMessage.textContent = data.message;
+                    lookupMessage.className = 'text-sm font-medium text-green-600';
+                } catch (error) {
+                    lookupMessage.textContent = error.message;
+                    lookupMessage.className = 'text-sm font-medium text-red-600';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

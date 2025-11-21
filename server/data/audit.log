@@ -1,0 +1,42 @@
+[
+  {
+    "event": "voter_login",
+    "actor": "STU-2025-001",
+    "at": "2025-11-21T09:45:33.674Z"
+  },
+  {
+    "event": "voter_login",
+    "actor": "STU-2025-001",
+    "at": "2025-11-21T09:48:02.619Z"
+  },
+  {
+    "event": "voter_login",
+    "actor": "STU-2025-001",
+    "at": "2025-11-21T09:48:21.761Z"
+  },
+  {
+    "event": "voter_login",
+    "actor": "j.malong@alustudent.com",
+    "at": "2025-11-21T09:53:12.997Z"
+  },
+  {
+    "event": "voter_login",
+    "actor": "j.malong@alustudent.com",
+    "at": "2025-11-21T09:53:27.647Z"
+  },
+  {
+    "event": "voter_login",
+    "actor": "j.malong@alustudent.com",
+    "at": "2025-11-21T09:53:34.753Z"
+  },
+  {
+    "event": "voter_login",
+    "actor": "j.malong@alustudent.com",
+    "at": "2025-11-21T10:27:24.061Z"
+  },
+  {
+    "event": "voter_login",
+    "actor": "j.malong@alustudent.com",
+    "at": "2025-11-21T10:27:43.272Z"
+  }
+]

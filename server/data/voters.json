@@ -1,0 +1,24 @@
+[
+  {
+    "studentId": "STU-2025-001",
+    "name": "Nyamal Gatluak",
+    "grade": "Grade 12",
+    "pinHash": "7110eda4d09e062aa5e4a390b0a572ac0d2c0220",
+    "faceTemplate": null
+  },
+  {
+    "studentId": "STU-2025-002",
+    "name": "Khor Nhial",
+    "grade": "Grade 12",
+    "pinHash": "7110eda4d09e062aa5e4a390b0a572ac0d2c0220",
+    "faceTemplate": null
+  },
+  {
+    "studentId": "j.malong@alustudent.com",
+    "name": "Joseph Malong",
+    "grade": "Grade 11",
+    "pinHash": "7110eda4d09e062aa5e4a390b0a572ac0d2c0220",
+    "faceTemplate": null
+  }
+]
+

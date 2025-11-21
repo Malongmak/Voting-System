@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Election Voting System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <style>
+        .accent-pill {
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            opacity: 0.22;
+            filter: blur(0px);
+            border-radius: 9999px;
+            z-index: 0;
+        }
+        .accent-pill--one {
+            top: -60px;
+            left: 8%;
+        }
+        .accent-pill--two {
+            top: 30px;
+            right: 10%;
+            width: 130px;
+            height: 130px;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+        }
+        .vote-card {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen overflow-x-hidden text-slate-900">
+    <div class="accent-pill accent-pill--one"></div>
+    <div class="accent-pill accent-pill--two"></div>
+    <header class="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500 text-white py-10 shadow relative overflow-hidden">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col gap-6 relative z-10">
+            <div class="flex items-center gap-6">
+                <div class="w-20 h-20 flex-shrink-0 rounded-full bg-white/10 border border-white/40 flex items-center justify-center overflow-hidden">
+                    <img id="schoolLogo" src="./images/logo.jpg" alt="School logo placeholder" class="max-h-full" aria-describedby="logoNote">
+                </div>
+                <div>
+                    <p class="uppercase text-sm tracking-widest mb-2 text-blue-100">Nuer Community School</p>
+                    <h1 class="text-3xl md:text-4xl font-bold">Student Leadership Elections</h1>
+                    <p class="text-blue-100 mt-2">Single-screen kiosk for practice ballots and quick polling.</p>
+                </div>
+            </div>
+            <nav aria-label="Primary" class="flex flex-wrap gap-4 text-sm font-semibold text-blue-50/90">
+                <a href="#voteForm" class="hover:text-white transition">Ballot</a>
+                <a href="#resultsChart" class="hover:text-white transition">Live Results</a>
+                <a href="./admin.html" class="hover:text-white transition">Admin Console</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 py-10 grid gap-8 lg:grid-cols-2 relative z-10">
+        <section class="vote-card bg-white rounded-2xl shadow p-6 border border-blue-100">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Cast Your Ballot</h2>
+            <p class="text-sm text-gray-500 mb-6">Enter your student details, then pick one candidate for each leadership role. Choose “None of the above” if you wish to abstain in any position.</p>
+
+            <form id="voteForm" class="space-y-6">
+                <div class="grid md:grid-cols-3 gap-4">
+                    <label class="text-sm font-medium text-gray-600 flex flex-col">
+                        Student Name
+                        <input id="studentName" type="text" required class="mt-1 border rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Nyamal Gatluak">
+                    </label>
+                    <label class="text-sm font-medium text-gray-600 flex flex-col">
+                        Student ID / Email
+                        <input id="studentId" type="text" required class="mt-1 border rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="STU-2025-001">
+                    </label>
+                    <label class="text-sm font-medium text-gray-600 flex flex-col">
+                        Grade / Class
+                        <select id="studentGrade" required class="mt-1 border rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="">Select</option>
+                            <option value="Grade 7">Grade 7</option>
+                            <option value="Grade 8">Grade 8</option>
+                            <option value="Grade 9">Grade 9</option>
+                            <option value="Grade 10">Grade 10</option>
+                            <option value="Grade 11">Grade 11</option>
+                            <option value="Grade 12">Grade 12</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div id="positionsContainer" class="space-y-6"></div>
+
+                <div class="flex flex-wrap gap-3">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        Submit Vote
+                    </button>
+                    <button type="button" id="resetForm" class="bg-gray-100 text-gray-700 px-6 py-2 rounded-md font-semibold hover:bg-gray-200 focus:ring-2 focus:ring-gray-400 focus:outline-none">
+                        Reset Form
+                    </button>
+                    <button type="button" id="clearVotes" class="bg-red-50 text-red-600 px-6 py-2 rounded-md font-semibold hover:bg-red-100 focus:ring-2 focus:ring-red-400 focus:outline-none">
+                        Clear Stored Votes
+                    </button>
+                </div>
+
+                    <p id="formMessage" class="text-sm font-medium"></p>
+                    <p id="formMessage" class="text-sm font-medium"></p>
+            </form>
+        </section>
+
+        <section class="vote-card bg-white rounded-2xl shadow p-6 border border-blue-100 flex flex-col">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                Live Results
+                <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded-full" id="totalVotes">0 VOTES</span>
+            </h2>
+
+            <label class="text-sm font-medium text-gray-600 flex flex-col mb-4">
+                View chart for position
+                <select id="chartPosition" class="mt-1 border rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+            </label>
+
+            <div class="flex-1 flex flex-col">
+                <div class="h-64">
+                    <canvas id="resultsChart" aria-label="Voting breakdown chart" role="img"></canvas>
+                </div>
+
+                <div class="mt-6 overflow-x-auto">
+                    <table class="min-w-full text-sm text-left">
+                        <thead class="text-gray-500 uppercase tracking-wide border-b">
+                            <tr>
+                                <th class="py-2 pr-4">Position</th>
+                                <th class="py-2 pr-4">Candidate</th>
+                                <th class="py-2">Votes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTable" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="max-w-6xl mx-auto px-6 pb-10 text-xs text-gray-500 space-y-2">
+        <p id="logoNote">Place your crest at <code>./images/logo.png</code> (or update the <code>#schoolLogo</code> src) to display it in the banner.</p>
+        <p>All votes are stored locally in this browser for demonstration. Clear stored votes between cohorts or refresh sessions.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const positions = [
+                {
+                    id: 'headBoy',
+                    title: 'School Head Boy',
+                    description: 'Represents the student body and leads whole-school assemblies.',
+                    candidates: ['Khor Nhial', 'James Koryom', 'Chuol Thon', 'None of the above']
+                },
+                {
+                    id: 'headGirl',
+                    title: 'School Head Girl',
+                    description: 'Coordinates prefect teams and drives academic mentorship.',
+                    candidates: ['Nyamal Gatluak', 'Adut Akol', 'Ayuen Kulang', 'None of the above']
+                },
+                {
+                    id: 'sportsCaptain',
+                    title: 'Sports & Culture Captain',
+                    description: 'Oversees inter-house competitions and cultural events.',
+                    candidates: ['Bol Lual', 'Tut Ring', 'Maryam Wek', 'None of the above']
+                }
+            ];
+
+            const votesKey = 'schoolElectionVotes';
+            const voteForm = document.getElementById('voteForm');
+            const positionsContainer = document.getElementById('positionsContainer');
+            const formMessage = document.getElementById('formMessage');
+            const resetFormButton = document.getElementById('resetForm');
+            const clearVotesButton = document.getElementById('clearVotes');
+            const totalVotesBadge = document.getElementById('totalVotes');
+            const resultsTable = document.getElementById('resultsTable');
+            const chartPositionSelect = document.getElementById('chartPosition');
+            let chartInstance;
+
+            const getStoredVotes = () => JSON.parse(localStorage.getItem(votesKey)) || [];
+            const saveVotes = (votes) => localStorage.setItem(votesKey, JSON.stringify(votes));
+
+            const renderPositions = () => {
+                positionsContainer.innerHTML = '';
+                positions.forEach((position) => {
+                    const fieldset = document.createElement('fieldset');
+                    fieldset.className = 'border border-gray-200 rounded-xl p-4';
+                    fieldset.innerHTML = `
+                        <legend class="text-lg font-semibold text-gray-800">${position.title}</legend>
+                        <p class="text-sm text-gray-500 mb-4">${position.description}</p>
+                        <div class="grid sm:grid-cols-2 gap-3">
+                            ${position.candidates.map((candidate) => `
+                                <label class="border rounded-lg px-3 py-2 flex items-center gap-2 hover:border-blue-400 cursor-pointer">
+                                    <input type="radio" name="${position.id}" value="${candidate}" class="text-blue-600 focus:ring-blue-500" required>
+                                    <span class="font-medium text-gray-700">${candidate}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    `;
+                    positionsContainer.appendChild(fieldset);
+                });
+            };
+
+            const buildResults = () => {
+                const votes = getStoredVotes();
+                const summary = {};
+                positions.forEach((position) => {
+                    summary[position.id] = position.candidates.reduce((acc, candidate) => {
+                        acc[candidate] = 0;
+                        return acc;
+                    }, {});
+                });
+                votes.forEach((vote) => {
+                    positions.forEach((position) => {
+                        const choice = vote.selections[position.id];
+                        if (choice && summary[position.id][choice] !== undefined) {
+                            summary[position.id][choice] += 1;
+                        }
+                    });
+                });
+                return { summary, totalVotes: votes.length };
+            };
+
+            const updateResultsTable = () => {
+                const { summary, totalVotes } = buildResults();
+                totalVotesBadge.textContent = `${totalVotes} ${totalVotes === 1 ? 'VOTE' : 'VOTES'}`;
+                resultsTable.innerHTML = '';
+
+                positions.forEach((position) => {
+                    position.candidates.forEach((candidate, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="py-2 pr-4 ${index === 0 ? 'font-semibold text-gray-800' : 'text-gray-700'}">${index === 0 ? position.title : ''}</td>
+                            <td class="py-2 pr-4">${candidate}</td>
+                            <td class="py-2 font-semibold text-gray-900">${summary[position.id][candidate]}</td>
+                        `;
+                        resultsTable.appendChild(row);
+                    });
+                });
+            };
+
+            const updateChart = () => {
+                let selectedPosition = chartPositionSelect.value;
+                const { summary } = buildResults();
+                if (!selectedPosition && positions.length > 0) {
+                    selectedPosition = positions[0].id;
+                    chartPositionSelect.value = selectedPosition;
+                }
+                if (!selectedPosition) {
+                    return;
+                }
+                const data = summary[selectedPosition] || {};
+                const labels = Object.keys(data);
+                const votes = Object.values(data);
+
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+
+                const ctx = document.getElementById('resultsChart').getContext('2d');
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Votes',
+                            data: votes,
+                            backgroundColor: ['#1d4ed8', '#3b82f6', '#0ea5e9', '#6366f1'],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { precision: 0 }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: positions.find((pos) => pos.id === selectedPosition).title
+                            },
+                            legend: { display: false }
+                        }
+                    }
+                });
+            };
+
+            const populateChartSelect = () => {
+                chartPositionSelect.innerHTML = positions.map((position) => `
+                    <option value="${position.id}">${position.title}</option>
+                `).join('');
+                updateChart();
+            };
+
+            voteForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                formMessage.textContent = '';
+                formMessage.className = 'text-sm font-medium';
+
+                const studentName = document.getElementById('studentName').value.trim();
+                const studentId = document.getElementById('studentId').value.trim();
+                const studentGrade = document.getElementById('studentGrade').value;
+
+                if (!studentName || !studentId || !studentGrade) {
+                    formMessage.textContent = 'Please complete all student information fields.';
+                    formMessage.className = 'text-sm font-medium text-red-600';
+                    return;
+                }
+
+                const votes = getStoredVotes();
+                if (votes.some((vote) => vote.studentId.toLowerCase() === studentId.toLowerCase())) {
+                    formMessage.textContent = 'A vote with this Student ID already exists.';
+                    formMessage.className = 'text-sm font-medium text-red-600';
+                    return;
+                }
+
+                const selections = {};
+                for (const position of positions) {
+                    const choice = voteForm.querySelector(`input[name="${position.id}"]:checked`);
+                    if (!choice) {
+                        formMessage.textContent = `Please choose a candidate for ${position.title}.`;
+                        formMessage.className = 'text-sm font-medium text-red-600';
+                        return;
+                    }
+                    selections[position.id] = choice.value;
+                }
+
+                votes.push({
+                    studentName,
+                    studentId,
+                    studentGrade,
+                    selections,
+                    timestamp: new Date().toISOString()
+                });
+
+                saveVotes(votes);
+                voteForm.reset();
+                formMessage.textContent = 'Vote submitted successfully!';
+                formMessage.className = 'text-sm font-medium text-blue-600';
+                updateResultsTable();
+                updateChart();
+            });
+
+            resetFormButton.addEventListener('click', () => {
+                voteForm.reset();
+                formMessage.textContent = '';
+            });
+
+            clearVotesButton.addEventListener('click', () => {
+                if (confirm('This will remove all stored votes on this device. Continue?')) {
+                    localStorage.removeItem(votesKey);
+                    updateResultsTable();
+                    updateChart();
+                    formMessage.textContent = 'All stored votes cleared.';
+                    formMessage.className = 'text-sm font-medium text-gray-600';
+                }
+            });
+
+            chartPositionSelect.addEventListener('change', updateChart);
+
+            renderPositions();
+            populateChartSelect();
+            updateResultsTable();
+        });
+    </script>
+    <script type="module">
+        import { animate, stagger } from "https://cdn.jsdelivr.net/npm/motion@12.23.24/+esm";
+
+        animate(".accent-pill", { scale: [1, 1.15, 1], opacity: [0.25, 0.4, 0.25] }, {
+            duration: 8,
+            repeat: Infinity,
+            easing: "easeInOut"
+        });
+
+        animate(".vote-card", { opacity: [0, 1], y: [24, 0] }, {
+            delay: stagger(0.15),
+            duration: 0.8,
+            easing: "easeOut"
+        });
+
+        animate("#totalVotes", { scale: [1, 1.08, 1], color: ["#1d4ed8", "#60a5fa", "#1d4ed8"] }, {
+            duration: 3,
+            repeat: Infinity,
+            easing: "easeInOut"
+        });
+    </script>
+</body>
+</html>
+
